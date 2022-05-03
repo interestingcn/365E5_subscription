@@ -8,8 +8,8 @@ name: 365E5_subscription
 
 on: 
   workflow_dispatch:
-  schedule:
-    - cron: 0,30 0-2 * * *
+  # schedule:
+  #   - cron: 0,30 0-2 * * *
    
 jobs:
    Task:
@@ -26,14 +26,10 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: 安装依赖包
-      run: |
-        pip install requests
-
-
     - name: 开始任务
       run: |
         sudo timedatectl set-timezone "Asia/Shanghai"
+        pip install requests
 
         cd ${GITHUB_WORKSPACE}
         sed -i "22i ${{ secrets.APP_ID }}" main.py
@@ -46,23 +42,18 @@ jobs:
         echo "任务结束：$(date +"%Y-%m-%d %H:%M")"
         echo "======================================="
     
-    - name: test
+    - name: 提交修改
       run: |
-        cd ${GITHUB_WORKSPACE}
-        cat main.py
+        git config --local user.email "GithubActionsBot@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add token.txt
+        git commit -m "update" -a
 
-    
-    - name: 上载Token信息 #上传新的refresh_token到仓库
-      run: |
-        git config --global user.email ActiosBot@github.com
-        git config --global user.name githubActiosBot
-        git add ./token.txt
-        git commit -m "update refresh_token" -a
-
-    - name: Push changes
+    - name: 推送到仓库
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+
 
    CleanUselessData:
     needs: Task
@@ -72,5 +63,5 @@ jobs:
     - name: 清理运行记录
       uses: meloncn/delete-workflow-runs@main
       with:
-        retain_days: 7
+        retain_days: 1
         keep_minimum_runs: 1
