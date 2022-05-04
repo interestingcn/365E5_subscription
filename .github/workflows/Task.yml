@@ -8,8 +8,8 @@ name: 365E5_subscription
 
 on: 
   workflow_dispatch:
-  # schedule:
-  #   - cron: 0,30 0-2 * * *
+  schedule:
+    - cron: 30 * * * *
    
 jobs:
    Task:
