@@ -1,0 +1,70 @@
+#============================================================
+# 365E5_subscription
+# Author:interestingcn01@gmail.com
+# Github:https://github.com/interestingcn/365E5_subscription
+#============================================================
+
+name: 365E5_subscription
+
+on: 
+  workflow_dispatch:
+  # schedule:
+  #   - cron: 0,30 0-2 * * *
+   
+jobs:
+   Work:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: 导入仓库代码
+      uses: actions/checkout@master
+
+    - name: 部署运行环境
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    
+    - name: 安装依赖包
+      run: |
+        sudo timedatectl set-timezone "Asia/Shanghai"
+        pip install requests
+
+    - name: 开始任务
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        sed -i "22i ${{ secrets.APP_ID }}" main.py
+        sed -i "23i ${{ secrets.APP_SECRET }}" main.py
+        echo "======================================="
+        echo "任务开始：$(date +"%Y-%m-%d %H:%M")"
+        echo "======================================="
+        python main.py
+        echo "======================================="
+        echo "任务结束：$(date +"%Y-%m-%d %H:%M")"
+        echo "======================================="
+    
+    - name: 提交修改
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        git config --local user.email "GithubActionsBot@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add token.txt
+        git commit -m "update refresh_token" -a
+
+    - name: 推送到仓库
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+   CleanUselessData:
+    needs: Work
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - name: 清理运行记录
+      uses: meloncn/delete-workflow-runs@main
+      with:
+        retain_days: 3
+        keep_minimum_runs: 1
