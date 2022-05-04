@@ -58,8 +58,12 @@ def updateToken(refresh_token):
          }
     html = requests.post('https://login.microsoftonline.com/common/oauth2/v2.0/token',data=data,headers=headers)
     jsontxt = json.loads(html.text)
-    refresh_token = jsontxt['refresh_token']
-    access_token = jsontxt['access_token']
+    try:
+        refresh_token = jsontxt['refresh_token']
+        access_token = jsontxt['access_token']
+    except:
+        print(html.text)
+        exit()
     with open(tokenFilePath, 'w+') as f:
         f.write(refresh_token)
     return access_token
