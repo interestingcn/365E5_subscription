@@ -25,12 +25,13 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.8
-
-    - name: 开始任务
+    - name: 安装依赖包
       run: |
         sudo timedatectl set-timezone "Asia/Shanghai"
         pip install requests
 
+    - name: 开始任务
+      run: |
         cd ${GITHUB_WORKSPACE}
         sed -i "22i ${{ secrets.APP_ID }}" main.py
         sed -i "23i ${{ secrets.APP_SECRET }}" main.py
@@ -44,15 +45,17 @@ jobs:
     
     - name: 提交修改
       run: |
+        cd ${GITHUB_WORKSPACE}
         git config --local user.email "GithubActionsBot@github.com"
         git config --local user.name "GitHub Action Bot"
         git add token.txt
-        git commit -m "update" -a
+        git commit -m "update refresh_token" -a
 
     - name: 推送到仓库
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
 
 
    CleanUselessData:
@@ -63,5 +66,5 @@ jobs:
     - name: 清理运行记录
       uses: meloncn/delete-workflow-runs@main
       with:
-        retain_days: 1
+        retain_days: 3
         keep_minimum_runs: 1
