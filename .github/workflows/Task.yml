@@ -50,7 +50,7 @@ jobs:
         git config --local user.email "GithubActionsBot@github.com"
         git config --local user.name "GitHub Action Bot"
         git add .
-        git commit -m "<update>:ActionsBot" -a
+        git commit -m "<update>:Update Token：$(date +"%Y-%m-%d %H:%M")" -a
 
     - name: 推送到仓库
       uses: ad-m/github-push-action@master
